@@ -1,0 +1,7 @@
+# exclude database
+database/data/*
+!database/data/placeholder
+
+# exclude node.js modules and generated package file
+frontend/node_modules/
+frontend/package-lock.json
