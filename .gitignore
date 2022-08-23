@@ -5,3 +5,9 @@ database/data/*
 # exclude node.js modules and generated package file
 frontend/node_modules/
 frontend/package-lock.json
+
+# exclude python compiled code
+*.pyc
+
+# exclude MobaXTerm dump
+*ssh.exe.stackdump
