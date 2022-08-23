@@ -1,0 +1,14 @@
+FROM node:14-bullseye-slim
+
+# set working directory in container
+WORKDIR /projects/Apotheke/query_client/frontend
+
+# add `/app/node_modules/.bin` to $PATH
+ENV PATH ./node_modules/.bin:$PATH
+
+# install app dependencies if necessary
+RUN npm install --silent
+RUN npm install react-scripts@3.4.1 -g --silent
+
+# start app
+CMD ["npm", "start"]

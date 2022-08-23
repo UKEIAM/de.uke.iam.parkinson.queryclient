@@ -1,0 +1,38 @@
+version: "3.8"
+
+networks:
+        queryclient:
+
+services:
+        api:
+                build: 
+                        dockerfile: Dockerfile_api
+                container_name: qc_api
+                restart: "no"
+                ports:
+                        - "50601:22"
+                        - "50602:5000"
+                volumes:
+                        - /home/bellmann/projects:/projects
+
+        database:
+                image: postgres:14-bullseye
+                container_name: qc_database
+                environment:
+                        - POSTGRES_USER=qcuser
+                        - POSTGRES_PASSWORD=qcpassword
+                restart: "no"
+                user: 33:33
+                volumes: 
+                        - ./database/initdatabase.sql:/docker-entrypoint-initdb.d/initdhdatabases.sql
+                        - ./database/data:/var/lib/postgresql/data
+        gui:
+                build:
+                        dockerfile: Dockerfile_gui
+                container_name: qc_gui
+                restart: "no"
+                ports:
+                        - "50604:3000"
+                volumes:
+                        - /home/bellmann/projects:/projects
+
