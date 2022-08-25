@@ -37,3 +37,9 @@ You can send print jobs with a POST request using the JSON format. From the shel
 - Add interaction with 3D printer
 - Add interaction with label printer
 - Maybe adjust ports for convenience
+- Delete processed jobs
+- Remove seconds from dose timestamp
+- Refresh table on frontend every couple seconds
+- Maybe additional refresh button
+- add script/bash_rc config to open frontend on restart
+- add documentation to code
