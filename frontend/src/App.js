@@ -2,6 +2,7 @@ import React from 'react';
 import JobTable from "./JobTable";
 
 class App extends React.Component {
+    // add header of website, HOWTO and TODOs cards
     render() {
         return (
             <div className="App">
@@ -10,8 +11,7 @@ class App extends React.Component {
                         <h1>QueryClient</h1>
                         <div className="align-self-baseline">0.5.0</div>
                     </div>
-                    {/*can be changed to local image later */}
-                    <img width="70" src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/Dachmarke_universitaetsklinikum_hamburg-eppendorf.svg/1200px-Dachmarke_universitaetsklinikum_hamburg-eppendorf.svg.png" alt="sans"/>
+                    <img width="240" src="uke_logo_large.png" alt=""/>
                 </nav>
                 <div className="card text-center shadow p-3 mb-5 bg-white rounded mx-auto" style={{maxWidth: "100rem",width: "95%"}}>
                     <h3 className="card-header">Offene Druckjobs</h3>

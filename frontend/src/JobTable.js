@@ -1,18 +1,19 @@
 import React from 'react';
 
+// component for the print job table
 class JobTable extends React.Component {
-    // just for reloading if needed
     constructor() {
         super();
         this.state = {
             currentId : 0,
-            apiData : []
+            apiData : [],
         }
 
         this.sendJob = this.sendJob.bind(this)
         this.deleteJob = this.deleteJob.bind(this)
     }
 
+    // GET request to the REST-API
     async getData() {
         let result = await fetch('http://localhost:50602/outgoing')
             .then(response => response.json())
@@ -25,10 +26,19 @@ class JobTable extends React.Component {
         )
     }
 
+    // this function is called when the component is initialized
+    // it gets the open print jobs from the REST API
+    // and sets an interval to repeat the GET request every 2 seconds
     async componentDidMount() {
         this.setState({apiData : await this.getData()})
+        this.interval = setInterval(async () => this.setState({ apiData : await this.getData()}), 2000)
+    }
+    // this clears the interval upon deletion of the component, so no more GET requests are performed
+    componentWillUnmount() {
+        clearInterval(this.interval);
     }
 
+    // the header of the table
     getHeader() {
         return (
             <thead>
@@ -49,6 +59,8 @@ class JobTable extends React.Component {
         );
     }
 
+    // this function sends a PUT request to the REST-API to print the specified job
+    // the job will be deleted from the database after it was sent
     async sendJob() {
         await fetch('http://localhost:50602/outgoing', {
             method: 'PUT',
@@ -59,10 +71,10 @@ class JobTable extends React.Component {
         })
         console.log("Job " + this.state.currentId + " processed")
         this.setState({apiData : await this.getData()}, this.forceUpdate())
-        // await this.getData()
-        // this.forceUpdate()
     }
 
+    // this function sends a DELETE request to the REST-API
+    // permanently deleting the job from the database
     async deleteJob() {
         await fetch('http://localhost:50602/outgoing', {
             method: 'DELETE',
@@ -75,6 +87,7 @@ class JobTable extends React.Component {
         this.setState({apiData : await this.getData()}, this.forceUpdate())
     }
 
+    // this creates a popup the is shown when a print job is sent or deleted
     getPopup(popupId, text, func) {
         return (
             <div className="modal hide fade" id={popupId} tabIndex="-1" role="dialog"
@@ -102,6 +115,7 @@ class JobTable extends React.Component {
         );
     }
 
+    // this creates a button for sending or deleting the specified job
     getButton(job) {
         return (
             <div className="container">
@@ -122,6 +136,7 @@ class JobTable extends React.Component {
         );
     }
 
+    // this function renders the whole table and the two send and delete popups
     render() {
         return (
             <div className="jobs-container">
