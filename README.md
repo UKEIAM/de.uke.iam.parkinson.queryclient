@@ -27,17 +27,29 @@ When working with a remote docker host (like in the IAM group), you need to adju
 
 # Sending print jobs to the REST-API
 
-You can send print jobs with a POST request using the JSON format. From the shell this can be done with a command like `curl -X POST -H "Content-Type: application/json" -d '{"surname" : "ImGlueck", "givenName":"Hans", "birthday":"1990-12-24", "logisticsID":122, "medicationName":"Ibuprofen", "medicationDose":"70/30", "medicationUnit":"mg", "medicationTimestamp":"2022-01-01 15:22:15", "hospitalWard":"Station 1"}' -i localhost:50602/incoming`
+You can send print jobs with a POST request using the JSON format. From the shell this can be done with a command like `curl -X POST -H "Content-Type: application/json" -d '{"dataString" : "Mustermann|Max|1990-12-25|0815|Station 1|MedPrint3D|Med 100 mg|1.5|2022-09-09 15:21"}' -i localhost:50602/incoming`
+
+# Install printer
+
+In this section we assume that you use a Linux distribution.
+* Plug the label printer in an USB port
+* Install CUPS (if not existing) with `sudo apt install cups cups-client`
+* Check the adress of the printer with `sudo lpinfo -v`
+* If e.g. the adress is `usb://TSC/TDP-225?serial=000001`, add the printer with `sudo lpadmin -p labelprinter -v usb://TSC/TDP-225?serial=000001`. Here it is important, that you name the printer "labelprinter"
+* Enable the printer with `sudo cupsenable labelprinter`
+* Let it accept print jobs with `sudo cupsaccept labelprinter` 
 
 # TODOs
 
-* Adjust paths in `docker-compose.yml` and `Dockerfile_api` for production
-* Add interaction with 3D printer
-* Add interaction with label printer
-* Maybe adjust ports for convenience
-* Delete processed jobs
-* Remove seconds from dose timestamp
-* Refresh table on frontend every couple seconds
-* Maybe additional refresh button
-* add script/bash_rc config to open frontend on restart
-* add documentation to code
+* [ ] Adjust paths in `docker-compose.yml` and `Dockerfile_api` for production
+* [ ] Add interaction with 3D printer
+* [x] Add interaction with label printer
+* [ ] Maybe adjust ports for convenience
+* [x] Adjust to input from UKE-Apotheke
+* [x] Delete processed jobs
+* [x] Remove seconds from dose timestamp
+* [x] Refresh table on frontend every couple seconds
+* [ ] Maybe additional refresh button
+* [ ] Add script/bash_rc config to open frontend on restart
+* [x] Add documentation to code
+* [x] Add information for printer installation

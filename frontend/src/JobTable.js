@@ -7,6 +7,7 @@ class JobTable extends React.Component {
         this.state = {
             currentId : 0,
             apiData : [],
+            returnMessage : ""
         }
 
         this.sendJob = this.sendJob.bind(this)
@@ -47,12 +48,12 @@ class JobTable extends React.Component {
                 <th scope="col">Nachname</th>
                 <th scope="col">Vorname</th>
                 <th scope="col">Geburtstag</th>
+                <th scope="col">Fallnummer</th>
+                <th scope="col">Station</th>
                 <th scope="col">LogistikID</th>
                 <th scope="col">Medikation</th>
                 <th scope="col">Dosis</th>
-                <th scope="col">Einheit</th>
                 <th scope="col">Gabezeitpunkt</th>
-                <th scope="col">Station</th>
                 <th scope="col">Button</th>
             </tr>
             </thead>
@@ -62,32 +63,76 @@ class JobTable extends React.Component {
     // this function sends a PUT request to the REST-API to print the specified job
     // the job will be deleted from the database after it was sent
     async sendJob() {
-        await fetch('http://localhost:50602/outgoing', {
+        let result = await fetch('http://localhost:50602/outgoing', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id: this.state.currentId })
-        }).catch((err) => {
+        }).then(response => response.json())
+            .then(data => {return data})
+            .catch((err) => {
             console.log(err.message);
         })
-        console.log("Job " + this.state.currentId + " processed")
-        this.setState({apiData : await this.getData()}, this.forceUpdate())
+        if (result.status !== "200") {
+            this.setState({returnMessage : "FEHLER: " + result.message})
+            $('#responsePopup').modal('show')
+        }
+        else {
+            this.setState({returnMessage : result.message})
+            $('#responsePopup').modal('show')
+            this.setState({apiData : await this.getData()}, this.forceUpdate())
+        }
     }
 
     // this function sends a DELETE request to the REST-API
     // permanently deleting the job from the database
     async deleteJob() {
-        await fetch('http://localhost:50602/outgoing', {
+        let result = await fetch('http://localhost:50602/outgoing', {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id: this.state.currentId })
-        }).catch((err) => {
-            console.log(err.message);
-        })
-        console.log("Job " + this.state.currentId + " deleted")
-        this.setState({apiData : await this.getData()}, this.forceUpdate())
+        }).then(response => response.json())
+            .then(data => {return data})
+            .catch((err) => {
+                console.log(err.message);
+            })
+        if (result.status !== "200") {
+            this.setState({returnMessage : "FEHLER: " + result.message})
+            $('#responsePopup').modal('show')
+        }
+        else {
+            this.setState({returnMessage : result.message})
+            $('#responsePopup').modal('show')
+            this.setState({apiData : await this.getData()}, this.forceUpdate())
+        }
     }
 
-    // this creates a popup the is shown when a print job is sent or deleted
+    // creates the popup for the response of the REST-API when processing or deleting a job
+    getResponsePopup() {
+        return (
+            <div className="modal hide fade" id="responsePopup" tabIndex="-1" role="dialog"
+                 aria-labelledby="exampleModalLabel" aria-hidden="true" style={{color:"black"}}
+                 ref={this.state.ref}>
+                <div className="modal-dialog" role="dialog">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h3 className="text-center">Antwort Druckjob ID {this.state.currentId}</h3>
+                            <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close">
+                            </button>
+                        </div>
+                        <div className="modal-body">
+                            {this.state.returnMessage}
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-primary"
+                                    data-dismiss="modal">Okay</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // this creates a popup that is shown when a print job is sent or deleted
     getPopup(popupId, text, func) {
         return (
             <div className="modal hide fade" id={popupId} tabIndex="-1" role="dialog"
@@ -140,6 +185,7 @@ class JobTable extends React.Component {
     render() {
         return (
             <div className="jobs-container">
+                {this.getResponsePopup()}
                 {this.getPopup("sendPopup", "Möchten Sie den Job wirklich absenden?", this.sendJob)}
                 {this.getPopup("delPopup", "Möchten Sie den Job wirklich dauerhaft entfernen?", this.deleteJob)}
                 <div className="table-responsive">
@@ -153,12 +199,12 @@ class JobTable extends React.Component {
                                     <td>{job.surname}</td>
                                     <td>{job.givenName}</td>
                                     <td>{job.birthday}</td>
+                                    <td>{job.caseID}</td>
+                                    <td>{job.hospitalWard}</td>
                                     <td>{job.logisticsID}</td>
                                     <td>{job.medicationName}</td>
                                     <td>{job.medicationDose}</td>
-                                    <td>{job.medicationUnit}</td>
                                     <td>{job.medicationTimeStamp}</td>
-                                    <td>{job.hospitalWard}</td>
                                     <td>
                                         {this.getButton(job)}
                                     </td>

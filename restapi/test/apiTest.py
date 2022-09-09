@@ -1,36 +1,34 @@
-import sys, json, copy, pytest
+import sys, json, pytest
 sys.path.append('../src')
 import databaseHandler, app
 from unittest.mock import MagicMock
 
 valid_data = [
-    {"surname":"Lustig",
-      "givenName":"Peter",
-      "birthday":"1990-03-05",
-      "logisticsID":"145",
-      "medicationName": "Best Stoff",
-      "medicationDose": "60/40",
-      "medicationUnit":"l",
-      "medicationTimestamp": "2022-01-01 15:22:10",
-      "hospitalWard":"St 5"},
-    {"surname":"Columna",
-      "givenName":"Carla",
-      "birthday":"1981-03-22",
-      "logisticsID":"123",
-      "medicationName": "Okay Stoff",
-      "medicationDose": "20/80",
-      "medicationUnit":"t",
-      "medicationTimestamp": "2022-02-02 14:22:17",
-      "hospitalWard":"Station Uno"},
-    {"surname":"Mustermann",
-      "givenName":"Max",
-      "birthday":"1900-03-22",
-      "logisticsID":"121",
-      "medicationName": "Guter Stoff",
-      "medicationDose": "10/-90",
-      "medicationUnit":"kg",
-      "medicationTimestamp": "2022-08-17 01:01:17",
-      "hospitalWard":"Station 2"}]
+    {
+        "dataString":"Lustig|Peter|1990-03-05|12345|Station 9|Medi0815|Ibu 400|1.5|2022-08-17 01:01"
+    },
+    {
+        "dataString":"Mustermann|Max|1995-01-01|05671|Station 1|Dope1|Asperin C|2|2022-08-17 01:01"
+    },
+    {
+        "dataString":"Apfel|Anna|1967-08-08|12348|Station 2|Medi0815|Ibu 400|10.3|2022-09-09 11:08"
+    }]
+
+incomplete_data = {
+    "dataString":"Peter|1990-03-05|12345|Station 9|Medi0815|Ibu 400|1.5|2022-08-17 01:01"
+}
+
+missing_key = {
+    "invalid":"Lustig|Peter|1990-03-05|12345|Station 9|Medi0815|Ibu 400|1.5|2022-08-17 01:01"
+}
+
+invalid_date = {
+    "dataString":"Lustig|Peter|1 May 1990|12345|Station 9|Medi0815|Ibu 400|1.5|2022-08-17 01:01"
+}
+
+invalid_timestamp = {
+    "dataString":"Lustig|Peter|1990-03-05|12345|Station 9|Medi0815|Ibu 400|1.5|2022-08-17 01:01:01"
+}
 
 def test_insert_valid():
     databaseHandler.insert_job = MagicMock(return_value = 1)
@@ -42,31 +40,23 @@ def test_insert_valid():
 def test_insert_incomplete():
     databaseHandler.insert_job = MagicMock(return_value=1)
     test_client = app.app.test_client()
-    for key in  valid_data[0].keys():
-        invalid = copy.deepcopy(valid_data[0])
-        del invalid[key]
-        response = test_client.post('/incoming', data=json.dumps(invalid), content_type='application/json')
-        assert response.status_code == 401
+    response = test_client.post('/incoming', data=json.dumps(incomplete_data), content_type='application/json')
+    assert response.status_code == 401
 
 def test_invalid_date():
     databaseHandler.insert_job = MagicMock(return_value=1)
     test_client = app.app.test_client()
-    invalid_date = copy.deepcopy(valid_data[0])
-    invalid_date['birthday'] = '12 May 1990'
     response = test_client.post('/incoming', data=json.dumps(invalid_date), content_type='application/json')
     assert response.status_code == 401
-
-    invalid_timestamp = copy.deepcopy(valid_data[0])
-    invalid_timestamp['medicationTimestamp'] = '1990-05-12 13:30 Uhr'
     response = test_client.post('/incoming', data=json.dumps(invalid_timestamp), content_type='application/json')
     assert response.status_code == 401
 
 def test_mark_processed():
-    databaseHandler.mark_job_processed = MagicMock(return_value=True)
+    databaseHandler.remove_job = MagicMock(return_value=True)
     test_client = app.app.test_client()
     response = test_client.put('/outgoing', data='{"id":1}', content_type='application/json')
     assert response.status_code == 200
-    # empy JSON
+    # empty JSON
     response = test_client.put('/outgoing', data='{}', content_type='application/json')
     assert response.status_code == 204
     # no entry 'id'
@@ -76,7 +66,7 @@ def test_mark_processed():
     response = test_client.put('/outgoing', data='{"id":"invalid"}', content_type='application/json')
     assert response.status_code == 401
     # 'id' not found in database
-    databaseHandler.mark_job_processed = MagicMock(return_value=False)
+    databaseHandler.remove_job = MagicMock(return_value=False)
     response = test_client.put('/outgoing', data='{"id":1}', content_type='application/json')
     assert response.status_code == 401
 
@@ -85,7 +75,7 @@ def test_remove():
     test_client = app.app.test_client()
     response = test_client.delete('/outgoing', data='{"id":1}', content_type='application/json')
     assert response.status_code == 200
-    # empy JSON
+    # emtpy JSON
     response = test_client.delete('/outgoing', data='{}', content_type='application/json')
     assert response.status_code == 204
     # no entry 'id'
@@ -101,5 +91,4 @@ def test_remove():
 
 if __name__ == '__main__':
     pytest.main(['apiTest.py'])
-
 
