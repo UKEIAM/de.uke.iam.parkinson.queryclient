@@ -1,4 +1,5 @@
 import psycopg2, datetime
+import config
 
 def initialize_db():
     """
@@ -7,16 +8,16 @@ def initialize_db():
     :return: Returns the connection and cursor objects
     """
     # Connect to an existing database
-    connection = psycopg2.connect(user="qcuser",
-                                  password="qcpassword",
+    connection = psycopg2.connect(user=config.DB_USER,
+                                  password=config.DB_PW,
                                   host="qc_database",
                                   port="5432",
-                                  database="printjobs")
+                                  database=config.DB_NAME)
 
     # Create a cursor to perform database operations
     cursor = connection.cursor()
 
-    cursor.execute("CREATE TABLE IF NOT EXISTS printjobs ("
+    cursor.execute("CREATE TABLE IF NOT EXISTS " + config.DB_NAME + " ("
                    "id SERIAL PRIMARY KEY,"
                    "surname VARCHAR (200),"
                    "givenname VARCHAR (200),"
@@ -41,7 +42,7 @@ def insert_job(cursor, record) -> int:
     :return: Returns the generated ID of the inserted job
     """
     cursor.execute(
-        "INSERT INTO printjobs (surname,"
+        "INSERT INTO " + config.DB_NAME + " (surname,"
         "givenname,"
         "birthday,"
         "caseid,"
@@ -73,7 +74,7 @@ def get_all_jobs(cursor) -> list:
     :param cursor: The database cursor used for retrieval
     :return: Returns a list of dicts, each containing the data for one print job
     """
-    cursor.execute("SELECT * FROM printjobs;")
+    cursor.execute("SELECT * FROM " + config.DB_NAME + ";")
     result = []
     for row in cursor.fetchall():
         row_result = {
@@ -99,7 +100,7 @@ def get_job(cursor, id: int) -> dict:
     :param id: The ID used to identify the print job
     :return: Returns dict containing the data for the print job. The dict is empty if the ID was invalid
     """
-    cursor.execute("SELECT * FROM printjobs WHERE id = " + str(id) + ';')
+    cursor.execute("SELECT * FROM " + config.DB_NAME + " WHERE id = " + str(id) + ';')
     db_result = cursor.fetchall()
     if db_result is None or len(db_result) == 0:
         print('ID ' + str(id) + ' not found in database')
@@ -126,7 +127,7 @@ def remove_job(cursor, id: int) -> bool:
     :param id: The ID used to identify the print job
     :return: Returns true, if the ID was valid (and the job was deleted) and false otherwise
     """
-    cursor.execute("DELETE FROM printjobs WHERE id = " + str(id) + ' RETURNING id;')
+    cursor.execute("DELETE FROM " + config.DB_NAME + " WHERE id = " + str(id) + ' RETURNING id;')
     result = cursor.fetchone()
     if result is None or len(result) == 0 or result[0] != id:
         print('ID ' + str(id) + ' not found in database')

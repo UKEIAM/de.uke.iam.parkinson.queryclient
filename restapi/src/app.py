@@ -1,3 +1,4 @@
+import asyncio
 from flask import Flask, request, jsonify, make_response
 import databaseHandler, inputHandler, printHandler
 from flask_cors import CORS, cross_origin
@@ -50,7 +51,6 @@ def delete_entry(id: int, response_dict: dict) -> int :
     cursor.close()
     connection.close()
     return 200
-
 
 
 @app.route('/incoming', methods=['POST'])
@@ -135,6 +135,12 @@ def process_record():
         return make_response(response_dict, 401)
     cursor.close()
     connection.close()
+    # print medication
+    medication_print_str = asyncio.get_event_loop().run_until_complete(printHandler.print_dose(record))
+    if medication_print_str != 'Done':
+        response_dict['message'] = medication_print_str
+        response_dict['status'] = 500
+        return make_response(response_dict, 500)
     # print label
     label_ok = printHandler.print_label(record)
     if not label_ok:

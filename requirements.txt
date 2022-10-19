@@ -3,3 +3,5 @@ psycopg2-binary
 gunicorn
 flask-cors
 pytest
+websockets
+asyncio

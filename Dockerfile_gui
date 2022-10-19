@@ -1,7 +1,10 @@
 FROM node:14-bullseye-slim
 
+# copy source code to volume
+ADD ./frontend /data
+
 # set working directory in container
-WORKDIR /projects/Apotheke/query_client/frontend
+WORKDIR /data
 
 # add `/app/node_modules/.bin` to $PATH
 ENV PATH ./node_modules/.bin:$PATH

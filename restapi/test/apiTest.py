@@ -1,6 +1,6 @@
 import sys, json, pytest
 sys.path.append('../src')
-import databaseHandler, app
+import databaseHandler, app, printHandler
 from unittest.mock import MagicMock
 
 valid_data = [
@@ -52,6 +52,17 @@ def test_invalid_date():
     assert response.status_code == 401
 
 def test_mark_processed():
+    record = {"id": 1, 'surname' : "Mustermann",
+        'givenName' : "Max",
+        'birthday': "1980-08-01",
+        'caseID' : 815,
+        'hospitalWard' : "Station 1",
+        'logisticsID' : "Med1",
+        'medicationName' : "Med 100 mg",
+        'medicationDose' : 2.5,
+        'medicationTimeStamp': "2022-09-09 17:12"}
+    databaseHandler.get_job = MagicMock(return_value=record)
+    printHandler.print_label = MagicMock(return_value=True)
     databaseHandler.remove_job = MagicMock(return_value=True)
     test_client = app.app.test_client()
     response = test_client.put('/outgoing', data='{"id":1}', content_type='application/json')

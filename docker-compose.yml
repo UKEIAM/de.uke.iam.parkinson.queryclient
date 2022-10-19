@@ -7,13 +7,14 @@ services:
         api:
                 build: 
                         dockerfile: Dockerfile_api
+                        context: .
                 container_name: qc_api
                 restart: "always"
                 ports:
                         - "50601:22"
                         - "50602:5000"
                 volumes:
-                        - /home/bellmann/projects:/projects
+                        - ./restapi:/data
 
         database:
                 image: postgres:14-bullseye
@@ -22,17 +23,22 @@ services:
                         - POSTGRES_USER=qcuser
                         - POSTGRES_PASSWORD=qcpassword
                 restart: "always"
-                user: 33:33
                 volumes: 
-                        - ./database/initdatabase.sql:/docker-entrypoint-initdb.d/initdhdatabases.sql
-                        - ./database/data:/var/lib/postgresql/data
+                        - ./initdatabase.sql:/docker-entrypoint-initdb.d/initdhdatabases.sql
+                        - db-data:/var/lib/postgresql/data
         gui:
                 build:
                         dockerfile: Dockerfile_gui
+                        context: .
                 container_name: qc_gui
                 restart: "always"
                 ports:
                         - "50604:3000"
                 volumes:
-                        - /home/bellmann/projects:/projects
+                        - gui-data:/data
 
+volumes:
+        db-data:
+                driver: local
+        gui-data:
+                driver: local
